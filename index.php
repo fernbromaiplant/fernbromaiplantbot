@@ -27,7 +27,7 @@ if (!empty($events['events'])) {
             curl_close($ch);
 
             // 2. 呼叫 Gemini API (採用具體版本號以確保最大相容性)
-            $api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $api_key;
+            $api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" . $api_key;
             
             $prompt = "你是一位資深植物病理學家。第一行請直接寫出植物名，之後請針對健康狀況與處方給予簡短建議（請使用繁體中文）。";
 
@@ -70,5 +70,5 @@ if (!empty($events['events'])) {
     }
 } else {
     echo "<h1>Plant Doctor Bot</h1>";
-    echo "Status: Active (Diagnostic Mode)";
+    echo "Status: 22Active (Diagnostic Mode)";
 }
