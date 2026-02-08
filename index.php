@@ -1,6 +1,7 @@
 <?php
+// 1. 設定區 (請確保這裡正確)
 $access_token = 'zBjmdLPs6hhz0JKcrGTjfRTWBTYSSVxeR8YTHJFGatPDfuNu4i/9GwQ5YL3hFQWm9gN3EorIBc78X5tFpsg467e2Wh9Zy2Nx14DEgeUnEw7ycJ103VqtpEVEBw1RL4xkbdT+lyTStxBhEbix/k+FQwdB04t89/1O/w1cDnyilFU=';
-$api_key = "AIzaSyBF3MoPf24LL7fY0kuvSqmEBQ2fso0v3jU"; 
+$api_key = "AIzaSyB1JYGe1Hvhsh_bw10Yf_K6Iaexkm2HKnY"; 
 
 $content = file_get_contents('php://input');
 $events = json_decode($content, true);
@@ -11,7 +12,7 @@ if (!empty($events['events'])) {
             $replyToken = $event['replyToken'];
             $messageId = $event['message']['id'];
 
-            // 1. 從 LINE 獲取圖片
+            // A. 下載 LINE 圖片
             $url = 'https://api-data.line.me/v2/bot/message/' . $messageId . '/content';
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $access_token]);
@@ -19,16 +20,14 @@ if (!empty($events['events'])) {
             $imgData = curl_exec($ch);
             curl_close($ch);
 
-            // 2. 呼叫 Gemini 1.5 Flash (使用 v1beta 路徑)
+            // B. 呼叫 Gemini 1.5 Flash (使用新 Key 專屬的 v1beta 路徑)
             $gemini_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $api_key;
             
             $payload = [
-                "contents" => [[
-                    "parts" => [
-                        ["text" => "你是一位植物專家。請辨識此植物並給予繁體中文建議。"],
-                        ["inline_data" => ["mime_type" => "image/jpeg", "data" => base64_encode($imgData)]]
-                    ]
-                ]]
+                "contents" => [["parts" => [
+                    ["text" => "你是一位植物專家。請辨識此植物並給予繁體中文的照顧建議。"],
+                    ["inline_data" => ["mime_type" => "image/jpeg", "data" => base64_encode($imgData)]]
+                ]]]
             ];
 
             $ch = curl_init($gemini_url);
@@ -40,15 +39,15 @@ if (!empty($events['events'])) {
             $res = json_decode($response, true);
             curl_close($ch);
             
-            // 抓取回傳文字
+            // C. 處理結果
             if (isset($res['candidates'][0]['content']['parts'][0]['text'])) {
                 $replyText = $res['candidates'][0]['content']['parts'][0]['text'];
             } else {
-                $errorMsg = $res['error']['message'] ?? "模型連結異常";
+                $errorMsg = $res['error']['message'] ?? "模型啟動中，請稍候再試一次";
                 $replyText = "❌ 診斷失敗：$errorMsg";
             }
 
-            // 3. 回傳訊息給 LINE
+            // D. 回傳給使用者
             $post_data = ['replyToken' => $replyToken, 'messages' => [['type' => 'text', 'text' => $replyText]]];
             $ch = curl_init('https://api.line.me/v2/bot/message/reply');
             curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json', 'Authorization: Bearer ' . $access_token]);
@@ -58,5 +57,5 @@ if (!empty($events['events'])) {
         }
     }
 } else {
-    echo "Bot is OK! Using v1beta Final Version";
+    echo "Bot is Active! Version 3.0";
 }
