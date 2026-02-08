@@ -3,7 +3,7 @@
  * AI 植物醫生 v4.5 - 最終穩定版 (Render + LINE + Gemini V1)
  */
 ini_set('display_errors', 0);
-error_reporting(E_ALL);
+error_reporting(E_ALL);.
 
 // --- 已經填入你的 LINE Token ---
 $access_token = 'zBjmdLPs6hhz0JKcrGTjfRTWBTYSSVxeR8YTHJFGatPDfuNu4i/9GwQ5YL3hFQWm9gN3EorIBc78X5tFpsg467e2Wh9Zy2Nx14DEgeUnEw7ycJ103VqtpEVEBw1RL4xkbdT+lyTStxBhEbix/k+FQwdB04t89/1O/w1cDnyilFU='; 
@@ -74,7 +74,7 @@ if (!empty($events['events'])) {
     }
 } else {
     // 網頁端顯示狀態
-    echo "<h2>Plant Doctor Bot: Active</h2>";
+    echo "<h2>new Plant Doctor Bot: Active</h2>";
     echo "Model: Gemini 1.5 Flash (V1 Stable)";
 }
        
