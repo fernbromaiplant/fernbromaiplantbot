@@ -1,7 +1,9 @@
 <?php
-// 1. 設定區 (請確保這裡正確)
+/**
+ * AI 植物醫生 LINE Bot v4.1 - 穩定強化版
+ */
 $access_token = 'zBjmdLPs6hhz0JKcrGTjfRTWBTYSSVxeR8YTHJFGatPDfuNu4i/9GwQ5YL3hFQWm9gN3EorIBc78X5tFpsg467e2Wh9Zy2Nx14DEgeUnEw7ycJ103VqtpEVEBw1RL4xkbdT+lyTStxBhEbix/k+FQwdB04t89/1O/w1cDnyilFU=';
-$api_key = "AIzaSyB1JYGe1Hvhsh_bw10Yf_K6Iaexkm2HKnY"; 
+$api_key = "AIzaSyBF3MoPf24LL7fY0kuvSqmEBQ2fso0v3jU"; // 使用你測試成功的這把 Key
 
 $content = file_get_contents('php://input');
 $events = json_decode($content, true);
@@ -12,7 +14,7 @@ if (!empty($events['events'])) {
             $replyToken = $event['replyToken'];
             $messageId = $event['message']['id'];
 
-            // A. 下載 LINE 圖片
+            // 1. 下載 LINE 圖片
             $url = 'https://api-data.line.me/v2/bot/message/' . $messageId . '/content';
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $access_token]);
@@ -20,35 +22,41 @@ if (!empty($events['events'])) {
             $imgData = curl_exec($ch);
             curl_close($ch);
 
-            // B. 呼叫 Gemini 1.5 Flash (使用新 Key 專屬的 v1beta 路徑)
-            $gemini_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $api_key;
+            // 2. 呼叫 Gemini API (修正模型名稱為官方最穩定的 1.5-flash-latest)
+            $api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" . $api_key;
             
+            // 使用你 Byethost 版的精準 Prompt
+            $prompt = "你是一位資深植物病理學家。第一行只寫植物名，之後請針對健康狀況與處方給予簡短建議（使用繁體中文）。";
+
             $payload = [
                 "contents" => [["parts" => [
-                    ["text" => "你是一位植物專家。請辨識此植物並給予繁體中文的照顧建議。"],
+                    ["text" => $prompt],
                     ["inline_data" => ["mime_type" => "image/jpeg", "data" => base64_encode($imgData)]]
                 ]]]
             ];
 
-            $ch = curl_init($gemini_url);
+            $ch = curl_init($api_url);
             curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             $response = curl_exec($ch);
-            $res = json_decode($response, true);
+            $res_arr = json_decode($response, true);
             curl_close($ch);
             
-            // C. 處理結果
-            if (isset($res['candidates'][0]['content']['parts'][0]['text'])) {
-                $replyText = $res['candidates'][0]['content']['parts'][0]['text'];
+            // 3. 解析結果 (加入錯誤處理，避免回傳空白)
+            if (isset($res_arr['candidates'][0]['content']['parts'][0]['text'])) {
+                $replyText = $res_arr['candidates'][0]['content']['parts'][0]['text'];
             } else {
-                $errorMsg = $res['error']['message'] ?? "模型啟動中，請稍候再試一次";
-                $replyText = "❌ 診斷失敗：$errorMsg";
+                $errorMsg = $res_arr['error']['message'] ?? "AI 忙碌中，請隔 10 秒再試一次";
+                $replyText = "❌ 診斷暫時失敗：\n" . $errorMsg;
             }
 
-            // D. 回傳給使用者
-            $post_data = ['replyToken' => $replyToken, 'messages' => [['type' => 'text', 'text' => $replyText]]];
+            // 4. 回傳給 LINE 使用者
+            $post_data = [
+                'replyToken' => $replyToken,
+                'messages' => [['type' => 'text', 'text' => $replyText]]
+            ];
             $ch = curl_init('https://api.line.me/v2/bot/message/reply');
             curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json', 'Authorization: Bearer ' . $access_token]);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
@@ -57,5 +65,5 @@ if (!empty($events['events'])) {
         }
     }
 } else {
-    echo "Bot is Active! Version 3.0";
+    echo "Bot Status: Online (Gemini 1.5 Flash Latest)";
 }
