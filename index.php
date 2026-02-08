@@ -1,15 +1,13 @@
 <?php
 /**
- * AI 植物醫生 v4.6 - 終極穩定路徑版
+ * AI 植物醫生 v4.7 - 語法修復版
  */
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
-// --- 資訊確認 ---
 $access_token = 'zBjmdLPs6hhz0JKcrGTjfRTWBTYSSVxeR8YTHJFGatPDfuNu4i/9GwQ5YL3hFQWm9gN3EorIBc78X5tFpsg467e2Wh9Zy2Nx14DEgeUnEw7ycJ103VqtpEVEBw1RL4xkbdT+lyTStxBhEbix/k+FQwdB04t89/1O/w1cDnyilFU='; 
 $api_key = "AIzaSyCo6w2_SXVWkP0YBtReaQo9YoNyBAyZYRE"; 
 
-// 接收 LINE 訊息
 $content = file_get_contents('php://input');
 $events = json_decode($content, true);
 
@@ -27,8 +25,7 @@ if (!empty($events['events'])) {
             $imgData = curl_exec($ch);
             curl_close($ch);
 
-            // 2. 呼叫 Gemini API (使用 v1beta 的標準格式)
-            // 注意：如果這個路徑再不行，就代表你的 API Key 權限需要重新在 Google AI Studio 產生一張新的
+            // 2. 呼叫 Gemini API (採用具體版本號 1.5-flash)
             $api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $api_key;
             
             $prompt = "你是一位資深植物病理學家。第一行請直接寫出植物名，之後請針對健康狀況與處方給予簡短建議（請使用繁體中文）。";
@@ -49,12 +46,11 @@ if (!empty($events['events'])) {
             $res_arr = json_decode($response, true);
             curl_close($ch);
             
-            // 3. 解析與回傳
+            // 3. 回傳邏輯
             if (isset($res_arr['candidates'][0]['content']['parts'][0]['text'])) {
                 $replyText = $res_arr['candidates'][0]['content']['parts'][0]['text'];
             } else {
-                $errorMsg = $res_arr['error']['message'] ?? "API 目前不回應，請檢查 Google AI Studio 設定";
-                $replyText = "❌ 診斷失敗：\n" . $errorMsg;
+                $replyText = "❌ 診斷失敗，請確認 API Key 狀態。";
             }
 
             $post_data = [
@@ -69,8 +65,8 @@ if (!empty($events['events'])) {
         }
     }
 } else {
-    echo "<h2>Plant Doctor: Online</h2>";
-    echo "Ready for image diagnosis.";
+    echo "Bot Status: Online";
 }
+           
    
         
