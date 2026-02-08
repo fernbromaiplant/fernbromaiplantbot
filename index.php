@@ -7,7 +7,7 @@ error_reporting(E_ALL);
 
 // --- 已經填入你的 LINE Token ---
 $access_token = 'zBjmdLPs6hhz0JKcrGTjfRTWBTYSSVxeR8YTHJFGatPDfuNu4i/9GwQ5YL3hFQWm9gN3EorIBc78X5tFpsg467e2Wh9Zy2Nx14DEgeUnEw7ycJ103VqtpEVEBw1RL4xkbdT+lyTStxBhEbix/k+FQwdB04t89/1O/w1cDnyilFU='; 
-$api_key = "AIzaSyBF3MoPf24LL7fY0kuvSqmEBQ2fso0v3jU"; 
+$api_key = "AIzaSyCo6w2_SXVWkP0YBtReaQo9YoNyBAyZYRE""; 
 
 // 接收 LINE 傳來的訊息
 $content = file_get_contents('php://input');
