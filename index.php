@@ -1,4 +1,4 @@
-ㄡ<?php
+<?php
 /**
  * AI 植物醫生 v4.8 - 深度診斷版 (Render + LINE + Gemini V1)
  */
