@@ -1,5 +1,4 @@
 <?php
-// 設定鑰匙
 $access_token = 'zBjmdLPs6hhz0JKcrGTjfRTWBTYSSVxeR8YTHJFGatPDfuNu4i/9GwQ5YL3hFQWm9gN3EorIBc78X5tFpsg467e2Wh9Zy2Nx14DEgeUnEw7ycJ103VqtpEVEBw1RL4xkbdT+lyTStxBhEbix/k+FQwdB04t89/1O/w1cDnyilFU=';
 $api_key = "AIzaSyBF3MoPf24LL7fY0kuvSqmEBQ2fso0v3jU"; 
 
@@ -17,17 +16,16 @@ if (!empty($events['events'])) {
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $access_token]);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
             $imgData = curl_exec($ch);
             curl_close($ch);
 
-            // 2. 呼叫 Gemini (使用最新相容路徑)
-            $gemini_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" . $api_key;
+            // 2. 呼叫 Gemini (改用 v1 正式版路徑)
+            $gemini_url = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=" . $api_key;
             
             $payload = [
                 "contents" => [[
                     "parts" => [
-                        ["text" => "你是一位資深植物病理學家。請先識別植物名稱，再給予簡短的健康建議（繁體中文）。"],
+                        ["text" => "你是一位資深植物專家。請辨識此植物並給予繁體中文建議。"],
                         ["inline_data" => ["mime_type" => "image/jpeg", "data" => base64_encode($imgData)]]
                     ]
                 ]]
@@ -42,30 +40,21 @@ if (!empty($events['events'])) {
             $res = json_decode($response, true);
             curl_close($ch);
             
-            // 抓取回傳文字
             if (isset($res['candidates'][0]['content']['parts'][0]['text'])) {
                 $replyText = $res['candidates'][0]['content']['parts'][0]['text'];
             } else {
-                // 如果失敗，回傳具體的 Google 報錯訊息
-                $replyText = "❌ Gemini 診斷失敗。原因：" . ($res['error']['message'] ?? "模型連結異常，請檢查 Google AI Studio 設定。");
+                $replyText = "❌ Gemini 報錯：" . ($res['error']['message'] ?? "請檢查金鑰權限");
             }
 
-            // 3. 回傳訊息給 LINE
-            $post_data = [
-                'replyToken' => $replyToken,
-                'messages' => [['type' => 'text', 'text' => $replyText]]
-            ];
+            // 3. 回傳訊息
+            $post_data = ['replyToken' => $replyToken, 'messages' => [['type' => 'text', 'text' => $replyText]]];
             $ch = curl_init('https://api.line.me/v2/bot/message/reply');
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Content-Type: application/json',
-                'Authorization: Bearer ' . $access_token
-            ]);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json', 'Authorization: Bearer ' . $access_token]);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_exec($ch);
             curl_close($ch);
         }
     }
 } else {
-    echo "Bot is OK! Version: 1.1";
+    echo "Bot is OK! Using v1 API";
 }
