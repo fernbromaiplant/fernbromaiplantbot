@@ -2,7 +2,7 @@
 // Render 需要這行來確認連線埠
 $port = getenv('PORT') ?: 8080;
 
-$access_token = 'aa1a168e8873045d1a1ba1ec29b6e76d';
+$access_token = /6WzyKcDnpYvMcWERnr8NStyOsPxBY3dp9Ah8d4SzLB69IpoVEqTjtMcKiLmTZ419gN3EorIBc78X5tFpsg467e2Wh9Zy2Nx14DEgeUnEw4E/1awXM8cvW2o62gj7nAM91GDiHJpSB67rvSxc3dm5gdB04t89/1O/w1cDnyilFU='';
 $api_key = "AIzaSyBF3MoPf24LL7fY0kuvSqmEBQ2fso0v3jU"; 
 
 $content = file_get_contents('php://input');
