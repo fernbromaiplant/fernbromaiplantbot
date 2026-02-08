@@ -1,4 +1,4 @@
-<?php
+ㄡ<?php
 /**
  * AI 植物醫生 v4.8 - 深度診斷版 (Render + LINE + Gemini V1)
  */
@@ -69,6 +69,6 @@ if (!empty($events['events'])) {
         }
     }
 } else {
-    echo "<h1>Plant Doctor Bot</h1>";
+    echo "<h1>Plant Doctor Bot人</h1>";
     echo "Status: 22Active (Diagnostic Mode)";
 }
