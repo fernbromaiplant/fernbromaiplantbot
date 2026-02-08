@@ -11,7 +11,7 @@ if (!empty($events['events'])) {
             $replyToken = $event['replyToken'];
             $messageId = $event['message']['id'];
 
-            // 1. 下載 LINE 圖片
+            // 1. 從 LINE 獲取圖片
             $url = 'https://api-data.line.me/v2/bot/message/' . $messageId . '/content';
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $access_token]);
@@ -19,23 +19,16 @@ if (!empty($events['events'])) {
             $imgData = curl_exec($ch);
             curl_close($ch);
 
-            // 2. 呼叫 Gemini 1.5 Flash (使用最標準的 v1beta 路徑)
+            // 2. 呼叫 Gemini 1.5 Flash (使用 v1beta 路徑)
             $gemini_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $api_key;
             
             $payload = [
-                "contents" => [
-                    [
-                        "parts" => [
-                            ["text" => "你是一位資深植物專家。請辨識此植物並給予繁體中文建議。"],
-                            [
-                                "inline_data" => [
-                                    "mime_type" => "image/jpeg",
-                                    "data" => base64_encode($imgData)
-                                ]
-                            ]
-                        ]
+                "contents" => [[
+                    "parts" => [
+                        ["text" => "你是一位植物專家。請辨識此植物並給予繁體中文建議。"],
+                        ["inline_data" => ["mime_type" => "image/jpeg", "data" => base64_encode($imgData)]]
                     ]
-                ]
+                ]]
             ];
 
             $ch = curl_init($gemini_url);
@@ -47,12 +40,12 @@ if (!empty($events['events'])) {
             $res = json_decode($response, true);
             curl_close($ch);
             
+            // 抓取回傳文字
             if (isset($res['candidates'][0]['content']['parts'][0]['text'])) {
                 $replyText = $res['candidates'][0]['content']['parts'][0]['text'];
             } else {
-                // 如果失敗，抓取最底層的錯誤原因
                 $errorMsg = $res['error']['message'] ?? "模型連結異常";
-                $replyText = "❌ 系統訊息：$errorMsg";
+                $replyText = "❌ 診斷失敗：$errorMsg";
             }
 
             // 3. 回傳訊息給 LINE
@@ -65,5 +58,5 @@ if (!empty($events['events'])) {
         }
     }
 } else {
-    echo "Bot is OK! Final Version 2.0";
+    echo "Bot is OK! Using v1beta Final Version";
 }
