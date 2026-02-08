@@ -23,7 +23,7 @@ if (!empty($events['events'])) {
             curl_close($ch);
 
             // 2. 呼叫 Gemini API (修正模型名稱為官方最穩定的 1.5-flash-latest)
-            $api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" . $api_key;
+            $api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $api_key;
             
             // 使用你 Byethost 版的精準 Prompt
             $prompt = "你是一位資深植物病理學家。第一行只寫植物名，之後請針對健康狀況與處方給予簡短建議（使用繁體中文）。";
